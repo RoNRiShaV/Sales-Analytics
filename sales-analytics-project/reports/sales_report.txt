@@ -1,0 +1,72 @@
+======================================================================
+E-COMMERCE SALES ANALYSIS REPORT
+======================================================================
+
+Report Generated: 2026-07-02 11:43:45
+======================================================================
+
+KEY METRICS
+--------------------------------------------------
+Total Orders:        8,923
+Total Revenue:       $3,180,955.57
+Average Order Value: $356.49
+Total Customers:     5,618
+Total Products:      50
+Avg Satisfaction:    3.69/5.0
+Avg Discount:        8.56%
+Total Profit:        $954,286.67
+
+TOP 5 PRODUCTS
+--------------------------------------------------
+1. Floor Mat: $158,247.52
+2. Modern Sofa: $155,868.47
+3. Coffee Table: $148,553.06
+4. Laptop Pro: $142,887.52
+5. Curtain Set: $138,443.07
+
+TOP 5 LOCATIONS
+--------------------------------------------------
+1. Massachusetts: $180,918.84
+2. Illinois: $177,990.16
+3. Michigan: $172,630.05
+4. Ohio: $165,488.92
+5. Pennsylvania: $162,624.29
+
+PAYMENT METHODS
+--------------------------------------------------
+Credit Card: $1,120,693.10 (35.2%)
+PayPal: $775,087.78 (24.4%)
+Debit Card: $631,118.70 (19.8%)
+Net Banking: $496,316.32 (15.6%)
+Gift Card: $157,739.67 (5.0%)
+
+CUSTOMER SEGMENTS
+--------------------------------------------------
+Middle Age (35-49): 2,853 customers, $1,276,047.50 revenue
+Senior (50+): 907 customers, $343,540.72 revenue
+Young (18-24): 1,640 customers, $653,801.53 revenue
+Young Adult (25-34): 2,290 customers, $907,565.82 revenue
+
+DAILY PATTERNS
+--------------------------------------------------
+Monday: $444,762.45
+Tuesday: $440,602.05
+Wednesday: $475,435.71
+Thursday: $503,948.47
+Friday: $423,615.23
+Saturday: $472,322.13
+Sunday: $420,269.53
+
+REVENUE FORECAST
+--------------------------------------------------
+Next 30 Days Forecast: $1,999,232.35
+
+======================================================================
+RECOMMENDATIONS
+======================================================================
+1. Focus on Electronics category - highest revenue contributor
+2. Target Young Adult segment - highest spending group
+3. Optimize Sunday promotions - peak shopping day
+4. Consider 15% discount strategy for optimal revenue
+5. Improve customer satisfaction in lower-rated products
+======================================================================

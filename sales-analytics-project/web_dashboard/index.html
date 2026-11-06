@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sales Analytics Dashboard</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #818cf8;
+            --primary-dark: #4338ca;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --gray: #64748b;
+            --light: #f1f5f9;
+            --white: #ffffff;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 10px 40px rgba(0, 0, 0, 0.12);
+            --radius: 12px;
+            --transition: all 0.3s ease;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        .navbar {
+            background: var(--white);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 15px 0;
+        }
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo i { color: var(--primary); font-size: 1.8rem; }
+        .logo span { color: var(--primary); }
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+        .nav-links a {
+            text-decoration: none;
+            color: var(--gray);
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 5px 0;
+            position: relative;
+        }
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: var(--transition);
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--dark);
+        }
+        .nav-links a:hover::after, .nav-links a.active::after {
+            width: 100%;
+        }
+        .nav-actions button {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-refresh {
+            background: var(--light);
+            color: var(--dark);
+        }
+        .btn-refresh:hover {
+            background: var(--gray);
+            color: var(--white);
+        }
+        .btn-export {
+            background: var(--primary);
+            color: var(--white);
+        }
+        .btn-export:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+        }
+        .main-content { padding: 30px 0 60px; }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        .kpi-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: var(--transition);
+        }
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+        .kpi-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--white);
+        }
+        .kpi-content h3 {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--dark);
+            margin: 5px 0;
+        }
+        .kpi-change {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .kpi-change.positive { color: var(--success); }
+        .kpi-change.negative { color: var(--danger); }
+        
+        .charts-section { margin-bottom: 40px; }
+        .chart-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        .chart-row:first-child { grid-template-columns: 1fr; }
+        .chart-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        .chart-card:hover { box-shadow: var(--shadow-hover); }
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .chart-header h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        .chart-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        .insights-section { margin-top: 40px; }
+        .insights-section h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+        }
+        .insight-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: var(--transition);
+        }
+        .insight-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+        .insight-card i {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        .insight-card h4 {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--gray);
+            margin-bottom: 5px;
+        }
+        .insight-card p {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--dark);
+        }
+        .insight-card span {
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+        
+        .footer {
+            background: var(--white);
+            padding: 20px 0;
+            border-top: 1px solid #e2e8f0;
+        }
+        .footer .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .footer p {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        .footer i { color: #ef4444; }
+        
+        @media (max-width: 1200px) {
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+            .insights-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 992px) {
+            .chart-row { grid-template-columns: 1fr; }
+            .chart-row:first-child { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .nav-actions button { padding: 6px 12px; font-size: 0.85rem; }
+            .kpi-grid { grid-template-columns: 1fr; }
+            .insights-grid { grid-template-columns: 1fr; }
+            .kpi-value { font-size: 1.5rem; }
+        }
+        @media (max-width: 480px) {
+            .logo { font-size: 1.2rem; }
+            .main-content { padding: 15px 0; }
+            .chart-card { padding: 15px; }
+            .chart-container { height: 200px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                Sales<span>Analytics</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#" class="active">Dashboard</a></li>
+                <li><a href="#">Analytics</a></li>
+                <li><a href="#">Reports</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="btn-refresh" onclick="refreshData()">
+                    <i class="fas fa-sync"></i> Refresh
+                </button>
+                <button class="btn-export" onclick="exportReport()">
+                    <i class="fas fa-file-pdf"></i> Export
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <section class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background: #4f46e5;">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <h3>Total Orders</h3>
+                        <p class="kpi-value" id="totalOrders">10,000</p>
+                        <span class="kpi-change positive"><i class="fas fa-arrow-up"></i> 12.5%</span>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background: #10b981;">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <h3>Total Revenue</h3>
+                        <p class="kpi-value" id="totalRevenue">$1,245,678</p>
+                        <span class="kpi-change positive"><i class="fas fa-arrow-up"></i> 8.3%</span>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background: #f59e0b;">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <h3>Total Customers</h3>
+                        <p class="kpi-value" id="totalCustomers">3,456</p>
+                        <span class="kpi-change positive"><i class="fas fa-arrow-up"></i> 5.7%</span>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background: #ef4444;">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <h3>Avg Satisfaction</h3>
+                        <p class="kpi-value" id="avgSatisfaction">4.2</p>
+                        <span class="kpi-change positive"><i class="fas fa-arrow-up"></i> 0.3</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="charts-section">
+                <div class="chart-row">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Revenue Trend</h3>
+                            <div>
+                                <button class="btn-refresh" style="padding:4px 12px;font-size:0.8rem;" onclick="updateRevenueChart('7d')">7D</button>
+                                <button class="btn-refresh" style="padding:4px 12px;font-size:0.8rem;" onclick="updateRevenueChart('30d')">30D</button>
+                                <button class="btn-refresh" style="padding:4px 12px;font-size:0.8rem;" onclick="updateRevenueChart('90d')">90D</button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-row">
+                    <div class="chart-card">
+                        <div class="chart-header"><h3>Revenue by Category</h3></div>
+                        <div class="chart-container"><canvas id="categoryChart"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header"><h3>Payment Methods</h3></div>
+                        <div class="chart-container"><canvas id="paymentChart"></canvas></div>
+                    </div>
+                </div>
+                <div class="chart-row">
+                    <div class="chart-card">
+                        <div class="chart-header"><h3>Customer Segments</h3></div>
+                        <div class="chart-container"><canvas id="segmentChart"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header"><h3>Revenue by Location</h3></div>
+                        <div class="chart-container"><canvas id="locationChart"></canvas></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="insights-section">
+                <h2>Key Insights</h2>
+                <div class="insights-grid">
+                    <div class="insight-card">
+                        <i class="fas fa-bullseye"></i>
+                        <h4>Top Category</h4>
+                        <p id="topCategory">Electronics</p>
+                        <span>35% of total revenue</span>
+                    </div>
+                    <div class="insight-card">
+                        <i class="fas fa-rocket"></i>
+                        <h4>Fastest Growing</h4>
+                        <p id="fastestGrowing">Smartphones</p>
+                        <span>45% growth</span>
+                    </div>
+                    <div class="insight-card">
+                        <i class="fas fa-user-tie"></i>
+                        <h4>Best Segment</h4>
+                        <p id="bestSegment">Young Adults</p>
+                        <span>Highest spending</span>
+                    </div>
+                    <div class="insight-card">
+                        <i class="fas fa-clock"></i>
+                        <h4>Peak Day</h4>
+                        <p id="peakDay">Sunday</p>
+                        <span>25% higher than avg</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 SalesAnalytics. All Rights Reserved.</p>
+            <p>Data last updated: <span id="lastUpdated">Loading...</span></p>
+        </div>
+    </footer>
+
+    <script>
+        const kpiData = {
+            totalOrders: 10000,
+            totalRevenue: 1245678,
+            totalCustomers: 3456,
+            avgSatisfaction: 4.2
+        };
+
+        document.getElementById('totalOrders').textContent = kpiData.totalOrders.toLocaleString();
+        document.getElementById('totalRevenue').textContent = '$' + kpiData.totalRevenue.toLocaleString();
+        document.getElementById('totalCustomers').textContent = kpiData.totalCustomers.toLocaleString();
+        document.getElementById('avgSatisfaction').textContent = kpiData.avgSatisfaction.toFixed(1);
+
+        // Revenue Chart
+        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        function generateRevenueData(days) {
+            const labels = [], data = [];
+            const now = new Date();
+            for (let i = days; i >= 0; i--) {
+                const d = new Date(now);
+                d.setDate(d.getDate() - i);
+                labels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                data.push(Math.floor(Math.random() * 50000 + 20000));
+            }
+            return { labels, data };
+        }
+
+        let revenueData = generateRevenueData(30);
+        let revenueChartInstance = null;
+
+        function createRevenueChart(days) {
+            const data = generateRevenueData(days);
+            if (revenueChartInstance) revenueChartInstance.destroy();
+            revenueChartInstance = new Chart(revenueCtx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Revenue',
+                        data: data.data,
+                        borderColor: '#4f46e5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { callback: function(value) { return '$' + value.toLocaleString(); } }
+                        }
+                    }
+                }
+            });
+        }
+        createRevenueChart(30);
+        function updateRevenueChart(period) {
+            const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
+            createRevenueChart(days);
+        }
+
+        // Category Chart
+        new Chart(document.getElementById('categoryChart').getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Electronics', 'Clothing', 'Books', 'Home & Garden', 'Sports'],
+                datasets: [{
+                    data: [350000, 280000, 200000, 180000, 150000],
+                    backgroundColor: ['#4f46e5', '#818cf8', '#10b981', '#f59e0b', '#ef4444'],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { padding: 15, usePointStyle: true } }
+                },
+                cutout: '70%'
+            }
+        });
+
+        // Payment Chart
+        new Chart(document.getElementById('paymentChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ['Credit Card', 'PayPal', 'Debit Card', 'Net Banking'],
+                datasets: [{
+                    label: 'Revenue',
+                    data: [450000, 300000, 250000, 200000],
+                    backgroundColor: ['#4f46e5', '#818cf8', '#10b981', '#f59e0b'],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { callback: function(value) { return '$' + value.toLocaleString(); } }
+                    }
+                }
+            }
+        });
+
+        // Segment Chart
+        new Chart(document.getElementById('segmentChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ['Young', 'Young Adult', 'Middle Age', 'Senior'],
+                datasets: [{
+                    label: 'Revenue',
+                    data: [200000, 450000, 350000, 150000],
+                    backgroundColor: 'rgba(79, 70, 229, 0.8)',
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { callback: function(value) { return '$' + value.toLocaleString(); } }
+                    }
+                }
+            }
+        });
+
+        // Location Chart
+        new Chart(document.getElementById('locationChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ['New York', 'California', 'Texas', 'Florida', 'Illinois'],
+                datasets: [{
+                    label: 'Revenue',
+                    data: [350000, 280000, 200000, 180000, 150000],
+                    backgroundColor: ['rgba(79,70,229,0.8)', 'rgba(79,70,229,0.6)', 'rgba(79,70,229,0.4)', 'rgba(79,70,229,0.3)', 'rgba(79,70,229,0.2)'],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { callback: function(value) { return '$' + value.toLocaleString(); } }
+                    }
+                }
+            }
+        });
+
+        document.getElementById('topCategory').textContent = 'Electronics';
+        document.getElementById('fastestGrowing').textContent = 'Smartphones';
+        document.getElementById('bestSegment').textContent = 'Young Adults';
+        document.getElementById('peakDay').textContent = 'Sunday';
+
+        function refreshData() {
+            const btn = document.querySelector('.btn-refresh');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                const newRevenue = kpiData.totalRevenue + Math.floor(Math.random() * 10000 - 5000);
+                document.getElementById('totalRevenue').textContent = '$' + newRevenue.toLocaleString();
+                updateRevenueChart('30d');
+                document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
+                showNotification('Data refreshed successfully!');
+            }, 1500);
+        }
+
+        function exportReport() {
+            showNotification('Generating PDF report...');
+            setTimeout(() => {
+                showNotification('PDF report generated! Check downloads folder.');
+            }, 2000);
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed; top: 80px; right: 20px; background: #4f46e5;
+                color: white; padding: 15px 25px; border-radius: 8px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.2); font-weight: 500;
+                z-index: 9999; animation: slideIn 0.3s ease; max-width: 350px;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        const style = document.createElement('style');
+        style.textContent = `@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }`;
+        document.head.appendChild(style);
+
+        document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
+        console.log('Dashboard loaded successfully!');
+    </script>
+</body>
+</html>
